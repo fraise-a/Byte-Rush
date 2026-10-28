@@ -1,0 +1,33 @@
+# Godot editor cache (keep .gd.uid and asset .import settings)
+.godot/
+
+# Build products and local test output
+/build/
+/dist/
+*.app/
+*.pck
+*.zip
+*.dmg
+*.pkg
+/tests/*.png
+/tests/*.json
+/tests/*.log
+
+# Local machine and editor files
+.DS_Store
+Thumbs.db
+*.tmp
+__pycache__/
+*.py[cod]
+.venv/
+.vscode/
+.idea/
+
+# Local credentials and export signing secrets
+.env
+.env.*
+!.env.example
+*.p12
+*.pfx
+*.mobileprovision
+export_credentials.cfg

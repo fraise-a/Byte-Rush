@@ -1,0 +1,45 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  headless-regressions:
+    runs-on: macos-14
+    timeout-minutes: 15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Install Godot 4.5.1
+        shell: bash
+        run: |
+          archive="$RUNNER_TEMP/godot.zip"
+          curl --fail --location --retry 3 \
+            https://github.com/godotengine/godot-builds/releases/download/4.5.1-stable/Godot_v4.5.1-stable_macos.universal.zip \
+            --output "$archive"
+          echo "65c27959d02aaacfc131ec7ecb90179ba8045200cb02982bf2be96d117010b8a  $archive" | shasum -a 256 --check
+          ditto -x -k "$archive" "$RUNNER_TEMP/godot"
+          echo "BYTE_RUSH_GODOT=$RUNNER_TEMP/godot/Godot.app/Contents/MacOS/Godot" >> "$GITHUB_ENV"
+
+      - name: Run headless suites and complete races
+        run: python3 tools/test.py
+
+      - name: Print test logs on failure
+        if: failure()
+        shell: bash
+        run: |
+          if [[ -d build/test-results ]]; then
+            for log in build/test-results/*.log; do
+              [[ -f "$log" ]] || continue
+              echo "$log"
+              tail -n 100 "$log"
+            done
+          fi
